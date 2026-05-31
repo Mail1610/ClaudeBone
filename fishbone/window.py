@@ -5,6 +5,8 @@ from PySide6.QtGui import (
     QTransform, QBrush, QColor, QIcon, QKeySequence, QPainter,
     QPen, QPixmap, QPolygonF, QShortcut,
 )
+import webbrowser
+
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QVBoxLayout, QWidget,
@@ -33,6 +35,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._build_central())
         self._register_shortcuts()
         self._sidebar.navigate.connect(self._on_navigate)
+        self._scene.reload_requested.connect(self._reload)
         self._reload()
 
     # ── responsive sizing ─────────────────────────────────────────────────────
@@ -94,6 +97,22 @@ class MainWindow(QMainWindow):
             "color:#7A5A3A; font-size:11px; font-family:Consolas;"
         )
 
+        github_btn = QPushButton("⭐  GitHub")
+        github_btn.setStyleSheet(Styles.TOOLBAR_BTN)
+        github_btn.setToolTip("開啟 GitHub 專案頁面")
+        github_btn.clicked.connect(
+            lambda: webbrowser.open("https://github.com/Mail1610/ClaudeBone")
+        )
+
+        issue_btn = QPushButton("🐛  回報問題")
+        issue_btn.setStyleSheet(Styles.TOOLBAR_BTN)
+        issue_btn.setToolTip("在 GitHub 上回報 bug 或建議功能")
+        issue_btn.clicked.connect(
+            lambda: webbrowser.open(
+                "https://github.com/Mail1610/ClaudeBone/issues/new/choose"
+            )
+        )
+
         layout.addWidget(title)
         layout.addSpacing(6)
         layout.addWidget(reload_btn)
@@ -102,6 +121,9 @@ class MainWindow(QMainWindow):
         layout.addSpacing(4)
         layout.addWidget(hint)
         layout.addStretch()
+        layout.addWidget(github_btn)
+        layout.addWidget(issue_btn)
+        layout.addSpacing(4)
         layout.addWidget(self._status)
         return tb
 

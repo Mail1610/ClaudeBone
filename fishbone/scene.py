@@ -1,6 +1,6 @@
 """QGraphicsScene that builds the fishbone diagram with cascading animations."""
 
-from PySide6.QtCore import Qt, QPointF, QRectF
+from PySide6.QtCore import Qt, QPointF, QRectF, Signal
 from PySide6.QtGui import (
     QBrush, QColor, QFont, QFontMetrics,
     QLinearGradient, QPainterPath, QPen, QPolygonF, QRadialGradient,
@@ -17,6 +17,8 @@ from .utils import GraphicsUtils
 
 
 class FishboneScene(QGraphicsScene):
+    reload_requested = Signal()
+
     BONE_H   = 220
     CAT_STEP = 340
     SESS_GAP = 38
@@ -151,7 +153,7 @@ class FishboneScene(QGraphicsScene):
                     self.addLine(px, py + side * 18, sx, sy2, QPen(lc, 1)), 200, t
                 )
             )
-            dot = SessionDot(sess, color)
+            dot = SessionDot(sess, color, on_delete=lambda: self.reload_requested.emit())
             dot.setPos(sx, sy2); self.addItem(dot)
             self._anims.append(GraphicsUtils.fade_in(dot, 240, t + k * 35))
 
