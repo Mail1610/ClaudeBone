@@ -76,8 +76,8 @@ def extract_user_messages(jsonl_path: Path, limit: int = 6) -> list[str]:
             if obj.get("type") != "user":
                 continue
             text = _parse_content(obj.get("message", {}).get("content", ""))
-            # skip hook outputs, slash-commands, and very short lines
-            if text and len(text) > 5 and not text.startswith("[") and not text.startswith("/"):
+            # skip hook outputs, slash-commands, system tags, and very short lines
+            if text and len(text) > 5 and not text.startswith(("[", "/", "<")):
                 msgs.append(text[:200])
     except Exception:
         pass

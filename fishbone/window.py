@@ -142,20 +142,33 @@ class MainWindow(QMainWindow):
 
     # ── actions ───────────────────────────────────────────────────────────────
     def _reload(self) -> None:
+        # stop any in-flight loader to avoid duplicate _on_loaded calls
+        if hasattr(self, "_loader") and self._loader.isRunning():
+            self._loader.done.disconnect()
+            self._loader.error.disconnect()
+            self._loader.quit()
+            self._loader.wait(500)
         self._status.setText("載入中…")
         self._loader = LoaderThread()
         self._loader.done.connect(self._on_loaded)
+        self._loader.error.connect(self._on_load_error)
         self._loader.start()
 
     def _on_loaded(self, data: dict) -> None:
-        self._scene.build(data)
-        self._sidebar.update_data(data)
-        total_s = sum(len(p["sessions"]) for v in data.values() for p in v)
-        total_p = sum(len(v) for v in data.values())
-        self._status.setText(
-            f"{len(data)} 類別  ·  {total_p} 專案  ·  {total_s} sessions"
-        )
-        self._fit()
+        try:
+            self._scene.build(data)
+            self._sidebar.update_data(data)
+            total_s = sum(len(p["sessions"]) for v in data.values() for p in v)
+            total_p = sum(len(v) for v in data.values())
+            self._status.setText(
+                f"{len(data)} 類別  ·  {total_p} 專案  ·  {total_s} sessions"
+            )
+            self._fit()
+        except Exception as exc:
+            self._status.setText(f"載入錯誤：{exc}")
+
+    def _on_load_error(self, msg: str) -> None:
+        self._status.setText(f"讀取失敗：{msg}")
 
     def _fit(self) -> None:
         self._view.setTransform(QTransform())

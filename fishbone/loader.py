@@ -6,7 +6,11 @@ from session_parser import load_all_projects
 
 
 class LoaderThread(QThread):
-    done = Signal(dict)
+    done  = Signal(dict)
+    error = Signal(str)
 
     def run(self) -> None:
-        self.done.emit(load_all_projects())
+        try:
+            self.done.emit(load_all_projects())
+        except Exception as exc:
+            self.error.emit(str(exc))
