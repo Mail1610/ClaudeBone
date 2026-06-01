@@ -191,6 +191,11 @@ class SessionDot(QGraphicsObject):
             self._tip.setPos(pos + QPointF(18, -24))
 
     def _remove_tip(self) -> None:
-        if self._tip and self._tip.scene():
-            self._tip.scene().removeItem(self._tip)
+        if self._tip:
+            try:
+                sc = self._tip.scene()
+                if sc:
+                    sc.removeItem(self._tip)
+            except RuntimeError:
+                pass
         self._tip = None
